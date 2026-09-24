@@ -27,6 +27,7 @@ function formatAmount(amount, currency) {
 function CheckoutForm({ link }) {
   const stripe = useStripe();
   const elements = useElements();
+  const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
@@ -40,6 +41,11 @@ function CheckoutForm({ link }) {
     const { error: submitError } = await stripe.confirmPayment({
       elements,
       redirect: 'if_required',
+      confirmParams: {
+        payment_method_data: {
+          billing_details: { email: email.trim() || undefined },
+        },
+      },
     });
 
     if (submitError) {
@@ -64,6 +70,18 @@ function CheckoutForm({ link }) {
 
   return (
     <form onSubmit={handleSubmit} className="pay-form">
+      <div className="field">
+        <label htmlFor="pay-email">الإيميل (لإرسال إيصال الدفع)</label>
+        <input
+          id="pay-email"
+          type="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </div>
+
       <PaymentElement />
       {error && <p className="form-error">{error}</p>}
       <button type="submit" className="btn btn-primary btn-wide" disabled={!stripe || submitting}>
@@ -112,7 +130,7 @@ export default function PayPage() {
   return (
     <div className="pay-page">
       <div className="pay-card">
-        <div className="pay-logo">Showme TV</div>
+        <img src="/logo.png" alt="Showme TV" className="pay-logo-img" />
 
         {state === 'loading' && <p className="hint">جاري التحميل...</p>}
 
