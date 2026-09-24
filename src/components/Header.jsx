@@ -1,18 +1,21 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useConfig } from '../context/ConfigContext';
+import { useTutorials } from '../hooks/useTutorials';
 import ContactButton from './ContactButton';
 
 export default function Header() {
   const config = useConfig();
   const c = config.copy;
   const [menuOpen, setMenuOpen] = useState(false);
+  const { tutorials } = useTutorials();
 
   const PAGES = [
     { href: '/', label: c.navHome },
     { href: '/pricing', label: c.navPricing },
-    { href: '/reviews', label: c.navReviews },
+
     { href: '/downloads', label: c.navDownloads },
+    ...(tutorials.length > 0 ? [{ href: '/guides', label: c.navGuides }] : []),
     { href: '/contact', label: c.navContact },
   ];
 
@@ -24,10 +27,7 @@ export default function Header() {
     <header>
       <div className="wrap nav">
         <NavLink to="/" className="logo" onClick={closeMenu}>
-          <span className="mark"><img src="/logo-icon.png" alt="Showme TV" /></span>
-          <span className="logo-text-wrap">
-            Showme TV<small>البث والترفيه</small>
-          </span>
+          <img className="brand-logo" src="/logo.png" alt="Showme TV" />
         </NavLink>
 
         <nav className="nav-links">

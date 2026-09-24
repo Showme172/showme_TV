@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Android">
+  <g fill="currentColor">
+    <path d="M19 27h26v20a5 5 0 0 1-5 5H24a5 5 0 0 1-5-5V27Z"/>
+    <path d="M16 28h-3v17a3 3 0 0 0 3 3h1V28Zm35 0h-3v20h1a3 3 0 0 0 3-3V28ZM23 49h6v9h-6v-9Zm12 0h6v9h-6v-9Z"/>
+    <path d="M21 25c0-7 5-12 11-12s11 5 11 12H21Zm-1-9-4-5 2-1 4 5-2 1Zm23 0 4-5-2-1-4 5 2 1Z"/>
+    <circle cx="27" cy="20" r="1.5" fill="white"/><circle cx="37" cy="20" r="1.5" fill="white"/>
+  </g>
+</svg>

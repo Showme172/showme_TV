@@ -5,12 +5,22 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 const ConfigContext = createContext({ config: DEFAULT_CONFIG, loading: false, live: false });
 
 // دمج آمن: أي حقل نص جديد نضيفه بالمستقبل بيرجع افتراضياً حتى لو نسخة الأدمن المحفوظة قديمة وما فيها هالحقل
+// وأي قائمة (مزايا، فئات قنوات، باقات...) لو انحفظت فاضية أو ناقصة بالغلط، بترجع للقيمة الافتراضية
+// بدل ما تصير القوائم فاضية وتظهر أزرار "عرض المزيد" بدون محتوى تحتها.
 function mergeConfig(saved) {
+  const s = saved || {};
+  const pickList = (key) => (Array.isArray(s[key]) && s[key].length > 0 ? s[key] : DEFAULT_CONFIG[key]);
   return {
     ...DEFAULT_CONFIG,
-    ...saved,
-    copy: { ...DEFAULT_CONFIG.copy, ...(saved?.copy || {}) },
-    messages: { ...DEFAULT_CONFIG.messages, ...(saved?.messages || {}) },
+    ...s,
+    copy: { ...DEFAULT_CONFIG.copy, ...(s.copy || {}) },
+    messages: { ...DEFAULT_CONFIG.messages, ...(s.messages || {}) },
+    trustBadges: pickList('trustBadges'),
+    features: pickList('features'),
+    channelCategories: pickList('channelCategories'),
+    plans: pickList('plans'),
+    faq: pickList('faq'),
+    quickHelp: pickList('quickHelp'),
   };
 }
 

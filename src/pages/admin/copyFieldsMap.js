@@ -75,17 +75,6 @@ export const COPY_GROUPS = [
     ],
   },
   {
-    title: 'صفحة آراء الزبائن',
-    fields: [
-      { key: 'reviewsEyebrow', label: 'الوسم الصغير' },
-      { key: 'reviewsH1', label: 'العنوان الرئيسي' },
-      { key: 'reviewsSub', label: 'الجملة التوضيحية' },
-      { key: 'reviewsEmptyState', label: 'نص "ما في آراء بعد"' },
-      { key: 'reviewsCtaHeading', label: 'عنوان قسم الدعوة الأخير' },
-      { key: 'reviewsCtaSub', label: 'الجملة التوضيحية' },
-    ],
-  },
-  {
     title: 'صفحة التطبيقات',
     fields: [
       { key: 'downloadsEyebrow', label: 'الوسم الصغير' },
@@ -99,7 +88,6 @@ export const COPY_GROUPS = [
     fields: [
       { key: 'navHome', label: 'رابط الرئيسية' },
       { key: 'navPricing', label: 'رابط الأسعار' },
-      { key: 'navReviews', label: 'رابط آراء الزبائن' },
       { key: 'navDownloads', label: 'رابط التطبيقات' },
       { key: 'navContact', label: 'رابط تواصل معنا' },
       { key: 'navTrialBtn', label: 'زر "جرّب مجاناً" بالنافبار' },

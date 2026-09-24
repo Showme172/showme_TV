@@ -56,37 +56,6 @@ export default function Contact() {
                 )}
               </div>
             </div>
-
-            <form className="support-form" onSubmit={handleSubmit}>
-              <div className="form-row">
-                <label htmlFor="f-name">الاسم</label>
-                <input id="f-name" type="text" placeholder="اسمك الكامل" required
-                  value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-              </div>
-              <div className="form-row">
-                <label htmlFor="f-email">كيف نتواصل معك؟ (اختياري)</label>
-                <input id="f-email" type="text" placeholder="إيميل، رقم واتساب، أو يوزر تيليجرام"
-                  value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              </div>
-              <div className="form-row">
-                <label htmlFor="f-msg">رسالتك</label>
-                <textarea id="f-msg" placeholder="اكتب سؤالك أو المشكلة التي تواجهها..." required
-                  value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
-              </div>
-              <button type="submit" className="btn btn-primary form-submit" disabled={status === 'sending'}>
-                {status === 'sending' ? 'جاري الإرسال...' : isSupabaseConfigured ? c.contactFormSubmit : 'إرسال عبر تيليجرام'}
-              </button>
-              {result && result.ok && (
-                <div className="form-status show">
-                  {result.mode === 'supabase'
-                    ? '✅ وصلتنا رسالتك! فريق الدعم رح يتواصل معك قريباً.'
-                    : 'فُتحت لك محادثة تيليجرام ورسالتك جاهزة بداخلها — يكفي الضغط على "إرسال" هناك.'}
-                </div>
-              )}
-              <p className="form-note">
-                أو راسلنا مباشرة على <a href={`mailto:${config.contactEmail}`}>{config.contactEmail}</a>.
-              </p>
-            </form>
           </div>
         </div>
       </section>

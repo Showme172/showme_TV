@@ -55,18 +55,17 @@ export const CONFIG = {
     contactFormSubmit: "إرسال الرسالة",
 
     // صفحة آراء الزبائن
-    reviewsEyebrow: "آراء حقيقية",
-    reviewsH1: "شو بيحكي زبائننا عنا.",
-    reviewsSub: "التجربة الحقيقية أصدق من أي وصف.",
-    reviewsEmptyState: "لسا ما في آراء مضافة.",
-    reviewsCtaHeading: "جاهز تنضم لهم؟",
-    reviewsCtaSub: "جرّب الخدمة بنفسك وشوف الفرق.",
-
     // صفحة التطبيقات
     downloadsEyebrow: "التطبيقات",
     downloadsH1: "التطبيقات المتاحة.",
     downloadsSub: "اختر التطبيق المناسب لك — روابط تحميل مباشرة، محدَّثة دائماً بآخر إصدار.",
     downloadsEmptyState: "لسا ما في تطبيقات مضافة.",
+
+    // صفحة الشروحات
+    guidesEyebrow: "شروحات",
+    guidesH1: "شروحات وفيديوهات.",
+    guidesSub: "خطوات مبسّطة بالفيديو لكل شي محتاج تعرفه عن اشتراكك.",
+    guidesEmptyState: "لسا ما في شروحات مضافة.",
 
     // الفوتر
     footerBrandDesc: "بث IPTV احترافي، مكتبة أفلام ومسلسلات ضخمة، وتفعيل فوري للاشتراكات — بإشارة ثابتة دون انقطاع.",
@@ -74,8 +73,8 @@ export const CONFIG = {
     // شريط التنقل
     navHome: "الرئيسية",
     navPricing: "الأسعار",
-    navReviews: "آراء الزبائن",
-    navDownloads: "التطبيقات",
+    navDownloads: "التطبيقات ",
+    navGuides: "شروحات",
     navContact: "تواصل معنا",
     navTrialBtn: "جرّب مجاناً",
     navActivateBtn: "فعّل الآن",

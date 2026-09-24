@@ -1,219 +1,199 @@
 import { useEffect, useRef, useState } from 'react';
-import { useConfig } from '../context/ConfigContext';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { telegramLink } from '../config';
+
+const METHODS = [
+  { id: 'phone', label: 'رقم هاتف', placeholder: '+963...' },
+  { id: 'email', label: 'إيميل', placeholder: 'you@example.com' },
+  { id: 'telegram', label: 'يوزر تيليجرام', placeholder: '@username' },
+];
+
+const POLL_MS = 2500;
+const STORAGE_KEY = 'inquiry_conversation_id';
+
+function functionsUrl(name) {
+  const base = import.meta.env.VITE_SUPABASE_URL;
+  return base ? `${base}/functions/v1/${name}` : null;
+}
 
 export default function LiveChat() {
-  const config = useConfig();
   const [open, setOpen] = useState(false);
-  const [view, setView] = useState('menu'); // menu | answer | details | chat
-  const [activeItem, setActiveItem] = useState(null);
-  const [details, setDetails] = useState({ name: '', email: '' });
-  const [conversation, setConversation] = useState(null); // { id, agentNo, agentName }
+  const [method, setMethod] = useState('phone');
+  const [form, setForm] = useState({ name: '', contact: '', message: '' });
+  const [status, setStatus] = useState('idle'); // idle | sending | error
+  const [conversationId, setConversationId] = useState(() => {
+    try { return sessionStorage.getItem(STORAGE_KEY); } catch { return null; }
+  });
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState('');
-  const [starting, setStarting] = useState(false);
   const threadRef = useRef(null);
+  const lastTsRef = useRef(null);
 
   useEffect(() => {
-    if (threadRef.current) {
-      threadRef.current.scrollTop = threadRef.current.scrollHeight;
-    }
+    if (threadRef.current) threadRef.current.scrollTop = threadRef.current.scrollHeight;
   }, [messages]);
 
   useEffect(() => {
-    if (!conversation || !isSupabaseConfigured) return;
-    const channel = supabase
-      .channel(`chat_${conversation.id}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `conversation_id=eq.${conversation.id}` },
-        (payload) => setMessages((prev) => [...prev, payload.new])
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'conversations', filter: `id=eq.${conversation.id}` },
-        (payload) => {
-          if (payload.new.assigned_agent_no) {
-            setConversation((prev) => (prev ? { ...prev, agentNo: payload.new.assigned_agent_no } : prev));
-          }
+    if (!conversationId) return;
+    let stopped = false;
+
+    async function poll() {
+      const url = functionsUrl('inquiry-poll');
+      if (!url) return;
+      const qs = new URLSearchParams({ conversation_id: conversationId });
+      if (lastTsRef.current) qs.set('after', lastTsRef.current);
+      try {
+        const res = await fetch(`${url}?${qs.toString()}`);
+        const data = await res.json();
+        if (data.ok && data.messages.length) {
+          setMessages((prev) => [...prev, ...data.messages]);
+          lastTsRef.current = data.messages[data.messages.length - 1].created_at;
         }
-      )
-      .subscribe();
-    return () => supabase.removeChannel(channel);
-  }, [conversation?.id]);
-
-  function openItem(item) {
-    setActiveItem(item);
-    setView('answer');
-  }
-
-  function backToMenu() {
-    setView('menu');
-    setActiveItem(null);
-  }
-
-  async function findOnlineAgent() {
-    const cutoff = new Date(Date.now() - 90 * 1000).toISOString();
-    const { data } = await supabase
-      .from('agent_presence')
-      .select('agent_id, last_seen, profiles(agent_no, display_name)')
-      .gte('last_seen', cutoff)
-      .limit(1);
-    if (data && data.length > 0 && data[0].profiles) {
-      return data[0].profiles;
+      } catch { /* تجاهل فشل محاولة واحدة */ }
+      if (!stopped) setTimeout(poll, POLL_MS);
     }
-    return null;
+    poll();
+    return () => { stopped = true; };
+  }, [conversationId]);
+
+  function toggle() {
+    setOpen((v) => !v);
   }
 
-  async function startConversation(e) {
+  async function handleStart(e) {
     e.preventDefault();
-    if (!isSupabaseConfigured) {
-      const context = activeItem
-        ? `بخصوص: ${activeItem.q}\n\nأنا ${details.name} (${details.email})`
-        : `أنا ${details.name} (${details.email})`;
-      window.open(telegramLink(context), '_blank', 'noopener');
-      return;
+    if (!form.name.trim() || !form.contact.trim() || !form.message.trim()) return;
+
+    setStatus('sending');
+    const url = functionsUrl('inquiry-start');
+    if (!url) { setStatus('error'); return; }
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          contact_method: method,
+          contact_value: form.contact.trim(),
+          message: form.message.trim(),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || 'فشل الإرسال');
+
+      setConversationId(data.conversation_id);
+      try { sessionStorage.setItem(STORAGE_KEY, data.conversation_id); } catch { /* noop */ }
+      setMessages([{ sender: 'visitor', body: form.message.trim(), created_at: new Date().toISOString() }]);
+      lastTsRef.current = new Date().toISOString();
+      setStatus('idle');
+    } catch {
+      setStatus('error');
     }
-
-    setStarting(true);
-    const agent = await findOnlineAgent();
-
-    const { data: conv, error } = await supabase
-      .from('conversations')
-      .insert({
-        customer_name: details.name,
-        customer_email: details.email,
-        assigned_agent_no: agent ? agent.agent_no : null,
-      })
-      .select()
-      .single();
-
-    if (error || !conv) {
-      setStarting(false);
-      return;
-    }
-
-    const firstMessage = activeItem ? `بخصوص: ${activeItem.q}` : 'بدي أتكلم مع فريق الدعم';
-    await supabase.from('chat_messages').insert({ conversation_id: conv.id, sender: 'customer', body: firstMessage });
-
-    setMessages([{ sender: 'customer', body: firstMessage, created_at: new Date().toISOString() }]);
-    setConversation({ id: conv.id, agentNo: agent?.agent_no || null, agentName: agent?.display_name || null });
-    setStarting(false);
-    setView('chat');
   }
 
-  async function sendMessage(e) {
+  async function handleSend(e) {
     e.preventDefault();
-    if (!draft.trim() || !conversation) return;
-    const body = draft.trim();
+    const text = draft.trim();
+    if (!text || !conversationId) return;
+
     setDraft('');
-    setMessages((prev) => [...prev, { sender: 'customer', body, created_at: new Date().toISOString() }]);
-    await supabase.from('chat_messages').insert({ conversation_id: conversation.id, sender: 'customer', body });
+    setMessages((prev) => [...prev, { sender: 'visitor', body: text, created_at: new Date().toISOString() }]);
+
+    const url = functionsUrl('inquiry-send');
+    if (!url) return;
+    try {
+      await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversation_id: conversationId, message: text }),
+      });
+    } catch { /* هيك رح تضل الرسالة ظاهرة عند الزائر، وبترسل تلقائياً بالمحاولة الجاية */ }
   }
+
+  const activeMethod = METHODS.find((m) => m.id === method);
 
   return (
-    <div className={`live-chat ${open ? 'open' : ''}`}>
+    <div className="live-chat">
       {open && (
         <div className="live-chat-panel">
           <div className="live-chat-head">
             <div className="live-chat-head-info">
-              <span className="mark"><img src="/logo-icon.png" alt="Showme TV" /></span>
-              <div>
-                <b>{config.copy.liveChatTitle}</b>
-                <span>{config.copy.liveChatSubtitle}</span>
-              </div>
+              <b>تواصل معنا</b>
+              <span>بنرد عليك بأقرب وقت</span>
             </div>
-            <button className="live-chat-close" onClick={() => setOpen(false)} aria-label="إغلاق">✕</button>
+            <button className="live-chat-close" onClick={toggle} aria-label="إغلاق">✕</button>
           </div>
 
           <div className="live-chat-body">
-            {view === 'menu' && (
-              <>
-                <p className="live-chat-greeting">{config.copy.liveChatGreeting}</p>
-                <div className="quick-help-list">
-                  {config.quickHelp.map((item, i) => (
-                    <button key={i} className="quick-help-btn" onClick={() => openItem(item)}>{item.q}</button>
-                  ))}
-                </div>
-                <button className="quick-help-btn escalate-btn" onClick={() => setView('details')}>
-                  {config.copy.liveChatEscalateBtn}
-                </button>
-              </>
-            )}
-
-            {view === 'answer' && activeItem && (
-              <>
-                <button className="live-chat-back" onClick={backToMenu}>← رجوع</button>
-                <p className="live-chat-question">{activeItem.q}</p>
-                <p className="live-chat-answer">{activeItem.a}</p>
-                <div className="live-chat-resolved-row">
-                  <button className="btn btn-outline btn-sm" onClick={backToMenu}>تم الحل 👍</button>
-                  <button className="btn btn-primary btn-sm" onClick={() => setView('details')}>
-                    لسا في مشكلة، حوّلني لفريق الدعم
-                  </button>
-                </div>
-              </>
-            )}
-
-            {view === 'details' && (
-              <>
-                <button className="live-chat-back" onClick={() => setView(activeItem ? 'answer' : 'menu')}>← رجوع</button>
-                <form className="live-chat-form" onSubmit={startConversation}>
-                  <input
-                    type="text" placeholder="اسمك" required
-                    value={details.name} onChange={(e) => setDetails({ ...details, name: e.target.value })}
-                  />
-                  <input
-                    type="text" placeholder="كيف نتواصل معك؟ إيميل، واتساب، أو تيليجرام (اختياري)"
-                    value={details.email} onChange={(e) => setDetails({ ...details, email: e.target.value })}
-                  />
-                  <button type="submit" className="btn btn-primary form-submit" disabled={starting}>
-                    {starting ? 'جاري الاتصال...' : 'بدء المحادثة'}
-                  </button>
-                </form>
-              </>
-            )}
-
-            {view === 'chat' && conversation && (
-              <>
-                <div className="agent-card">
-                  <div className="agent-avatar">{conversation.agentNo ? `#${conversation.agentNo}` : '…'}</div>
-                  <div>
-                    {conversation.agentNo ? (
-                      <>
-                        <b><span className="agent-status-dot"></span>الموظف #{conversation.agentNo}</b>
-                        <span>متصل الآن</span>
-                      </>
-                    ) : (
-                      <>
-                        <b><span className="agent-status-dot offline"></span>بانتظار موظف</b>
-                        <span>رسالتك محفوظة، رح نرد أول ما يتوفر أحد</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="chat-thread" ref={threadRef}>
+            {conversationId ? (
+              <div className="live-chat-thread-wrap">
+                <div className="live-chat-thread" ref={threadRef}>
                   {messages.map((m, i) => (
-                    <div key={i} className={`chat-bubble ${m.sender}`}>{m.body}</div>
+                    <div key={i} className={`chat-bubble ${m.sender === 'agent' ? 'chat-bubble-agent' : 'chat-bubble-visitor'}`}>
+                      {m.body}
+                    </div>
+                  ))}
+                </div>
+                <form className="live-chat-reply-row" onSubmit={handleSend}>
+                  <input
+                    placeholder="اكتب رسالتك..."
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                  />
+                  <button type="submit" className="btn btn-primary btn-sm">إرسال</button>
+                </form>
+              </div>
+            ) : (
+              <form className="live-chat-form" onSubmit={handleStart}>
+                <p className="live-chat-greeting">اكتبلنا اسمك ووسيلة تواصل، وشو بتحب تسألنا.</p>
+
+                <input
+                  placeholder="اسمك"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required
+                />
+
+                <div className="live-chat-method-row">
+                  {METHODS.map((m) => (
+                    <button
+                      type="button"
+                      key={m.id}
+                      className={`live-chat-method-btn ${method === m.id ? 'active' : ''}`}
+                      onClick={() => setMethod(m.id)}
+                    >
+                      {m.label}
+                    </button>
                   ))}
                 </div>
 
-                <form className="chat-input-row" onSubmit={sendMessage}>
-                  <input
-                    type="text" placeholder="اكتب رسالتك..."
-                    value={draft} onChange={(e) => setDraft(e.target.value)}
-                  />
-                  <button type="submit" className="chat-send-btn" aria-label="إرسال">➤</button>
-                </form>
-              </>
+                <input
+                  placeholder={activeMethod.placeholder}
+                  value={form.contact}
+                  onChange={(e) => setForm({ ...form, contact: e.target.value })}
+                  required
+                />
+
+                <textarea
+                  placeholder="اكتب رسالتك هون..."
+                  value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  required
+                />
+
+                {status === 'error' && (
+                  <p className="form-error">صار خطأ بالإرسال، جرّب مرة تانية.</p>
+                )}
+
+                <button type="submit" className="btn btn-primary" disabled={status === 'sending'}>
+                  {status === 'sending' ? 'جاري الإرسال...' : 'بدء المحادثة'}
+                </button>
+              </form>
             )}
           </div>
         </div>
       )}
 
-      <button className="live-chat-toggle" onClick={() => setOpen(!open)} aria-label="فتح الدردشة">
+      <button className="live-chat-toggle" onClick={toggle} aria-label="تواصل معنا">
         {open ? '✕' : '💬'}
       </button>
     </div>

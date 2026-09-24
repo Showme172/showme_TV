@@ -24,15 +24,14 @@ export default function Home() {
 
   return (
     <main>
-      <section className="hero">
-        <div className="wrap">
-          <span className="eyebrow">
-            <span className="dot"></span>بث مباشر — أكثر من 15,000 قناة الآن
-          </span>
+      <section className="hero" style={{ backgroundcolor: 'blue' }} >          
+        <div className="wrap" >
           <h1>
             {c.heroLine}
             <br />
-            <span className="accent">{c.heroAccent}</span>
+            <span className="accent">{c.heroAccent}
+              
+            </span>
           </h1>
           <p className="sub">{c.heroSub}</p>
           <div className="hero-ctas">
@@ -40,6 +39,7 @@ export default function Home() {
               {c.heroBtnSubscribe}
             </ContactButton>
             <Link to="/pricing" className="btn btn-outline btn-lg">{c.heroBtnPlans}</Link>
+           
           </div>
           <div className="hero-stats">
             <div className="stat"><CountUp text="15,000+" /><span>قناة مباشرة</span></div>
@@ -49,6 +49,7 @@ export default function Home() {
           </div>
           <TrustBadges items={config.trustBadges} />
         </div>
+        
       </section>
 
       <LiveScoreBanner />

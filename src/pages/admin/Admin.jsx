@@ -5,7 +5,6 @@ import AdminInbox from './AdminInbox';
 import AdminConversations from './AdminConversations';
 import AdminSettings from './AdminSettings';
 import AdminAgents from './AdminAgents';
-import AdminReviews from './AdminReviews';
 import AdminApps from './AdminApps';
 import AdminAnnouncement from './AdminAnnouncement';
 
@@ -110,7 +109,6 @@ export default function Admin() {
             <button className={tab === 'inbox' ? 'active' : ''} onClick={() => setTab('inbox')}>📨 الرسائل</button>
             <button className={tab === 'conversations' ? 'active' : ''} onClick={() => setTab('conversations')}>💬 المحادثات المباشرة</button>
             {isOwner && <button className={tab === 'settings' ? 'active' : ''} onClick={() => setTab('settings')}>⚙️ محتوى الموقع</button>}
-            {isOwner && <button className={tab === 'reviews' ? 'active' : ''} onClick={() => setTab('reviews')}>⭐ آراء الزبائن</button>}
             {isOwner && <button className={tab === 'apps' ? 'active' : ''} onClick={() => setTab('apps')}>📱 التطبيقات</button>}
             {isOwner && <button className={tab === 'announcement' ? 'active' : ''} onClick={() => setTab('announcement')}>📢 الإعلانات</button>}
             {isOwner && <button className={tab === 'agents' ? 'active' : ''} onClick={() => setTab('agents')}>👥 الموظفون</button>}
@@ -119,7 +117,6 @@ export default function Admin() {
           {tab === 'inbox' && <AdminInbox />}
           {tab === 'conversations' && <AdminConversations />}
           {tab === 'settings' && isOwner && <AdminSettings />}
-          {tab === 'reviews' && isOwner && <AdminReviews />}
           {tab === 'apps' && isOwner && <AdminApps />}
           {tab === 'announcement' && isOwner && <AdminAnnouncement />}
           {tab === 'agents' && isOwner && <AdminAgents />}

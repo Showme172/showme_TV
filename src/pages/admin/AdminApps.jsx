@@ -12,7 +12,7 @@ function normalizeUrl(url) {
 
 export default function AdminApps() {
   const [apps, setApps] = useState([]);
-  const [form, setForm] = useState({ name: '', version: '', download_url: '', downloader_code: '', icon_file: null });
+  const [form, setForm] = useState({ name: '', version: '', platform: 'android', download_url: '', tutorial_url: '', downloader_code: '', icon_file: null });
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
@@ -43,13 +43,15 @@ export default function AdminApps() {
     await supabase.from('apps').insert({
       name: form.name,
       version: form.version || null,
+      platform: form.platform,
       download_url: normalizeUrl(form.download_url),
+      tutorial_url: normalizeUrl(form.tutorial_url) || null,
       downloader_code: form.downloader_code || null,
       icon_url,
       sort_order: apps.length,
     });
 
-    setForm({ name: '', version: '', download_url: '', downloader_code: '', icon_file: null });
+    setForm({ name: '', version: '', platform: 'android', download_url: '', tutorial_url: '', downloader_code: '', icon_file: null });
     setSaving(false);
     load();
   }
@@ -75,7 +77,9 @@ export default function AdminApps() {
     setEditForm({
       name: app.name,
       version: app.version || '',
+      platform: app.platform || 'android',
       download_url: app.download_url || '',
+      tutorial_url: app.tutorial_url || '',
       downloader_code: app.downloader_code || '',
     });
   }
@@ -84,7 +88,9 @@ export default function AdminApps() {
     await supabase.from('apps').update({
       name: editForm.name,
       version: editForm.version || null,
+      platform: editForm.platform || 'android',
       download_url: normalizeUrl(editForm.download_url),
+      tutorial_url: normalizeUrl(editForm.tutorial_url) || null,
       downloader_code: editForm.downloader_code || null,
     }).eq('id', id);
     setEditingId(null);
@@ -100,7 +106,12 @@ export default function AdminApps() {
         <div className="row3">
           <div className="field"><label>اسم التطبيق</label><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
           <div className="field"><label>رقم الإصدار</label><input value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} placeholder="مثلاً 1.2.0" /></div>
+          <div className="field"><label>المنصة</label><select value={form.platform} onChange={(e) => setForm({ ...form, platform: e.target.value })}><option value="android">Android</option><option value="smart_tv">Smart TV</option><option value="iphone">iPhone</option><option value="windows">Windows</option></select></div>
           <div className="field"><label>رابط التحميل المباشر</label><input required value={form.download_url} onChange={(e) => setForm({ ...form, download_url: e.target.value })} placeholder="example.com/app.apk" /></div>
+        </div>
+          <div className="field">
+          <label>رابط الشرح على YouTube (اختياري)</label>
+          <input value={form.tutorial_url} onChange={(e) => setForm({ ...form, tutorial_url: e.target.value })} placeholder="youtube.com/watch?v=..." />
         </div>
         <div className="field">
           <label>كود Downloader (اختياري)</label>
@@ -121,8 +132,10 @@ export default function AdminApps() {
                 <div className="row3">
                   <div className="field"><label>اسم التطبيق</label><input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} /></div>
                   <div className="field"><label>رقم الإصدار</label><input value={editForm.version} onChange={(e) => setEditForm({ ...editForm, version: e.target.value })} /></div>
+                  <div className="field"><label>المنصة</label><select value={editForm.platform || 'android'} onChange={(e) => setEditForm({ ...editForm, platform: e.target.value })}><option value="android">Android</option><option value="smart_tv">Smart TV</option><option value="iphone">iPhone</option><option value="windows">Windows</option></select></div>
                   <div className="field"><label>رابط التحميل</label><input value={editForm.download_url} onChange={(e) => setEditForm({ ...editForm, download_url: e.target.value })} /></div>
                 </div>
+                <div className="field"><label>رابط الشرح على YouTube</label><input value={editForm.tutorial_url || ''} onChange={(e) => setEditForm({ ...editForm, tutorial_url: e.target.value })} /></div>
                 <div className="field"><label>كود Downloader</label><input value={editForm.downloader_code} onChange={(e) => setEditForm({ ...editForm, downloader_code: e.target.value })} /></div>
                 <div className="inbox-item-actions">
                   <button className="btn btn-primary btn-sm" onClick={() => saveEdit(app.id)}>حفظ</button>
@@ -134,9 +147,11 @@ export default function AdminApps() {
                 <div className="inbox-item-head">
                   <b>{app.name}</b>
                   {app.version && <span className="chan-badge">v{app.version}</span>}
+                  <span className="chan-badge">{app.platform === 'smart_tv' ? 'Smart TV' : app.platform === 'iphone' ? 'iPhone' : app.platform === 'windows' ? 'Windows' : 'Android'}</span>
                   {app.downloader_code && <span className="chan-badge">Downloader: {app.downloader_code}</span>}
                 </div>
                 <p className="text-dim" style={{ fontSize: 13, wordBreak: 'break-all' }}>{app.download_url}</p>
+                {app.tutorial_url && <p className="text-dim" style={{ fontSize: 13, wordBreak: 'break-all' }}>الشرح: {app.tutorial_url}</p>}
                 <div className="inbox-item-actions">
                   <button className="btn btn-outline btn-sm" onClick={() => startEdit(app)}>✎ تعديل</button>
                   <button className="btn btn-outline btn-sm" onClick={() => move(app.id, 'up')}>↑ لفوق</button>

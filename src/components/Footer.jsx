@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+
 import { telegramLink } from '../config';
 import { useConfig } from '../context/ConfigContext';
 import { SOCIAL_ICONS } from './Icons';
@@ -11,7 +12,6 @@ export default function Footer() {
   const PAGES = [
     { href: '/', label: c.navHome },
     { href: '/pricing', label: c.navPricing },
-    { href: '/reviews', label: c.navReviews },
     { href: '/downloads', label: c.navDownloads },
     { href: '/contact', label: c.navContact },
   ];
@@ -22,10 +22,7 @@ export default function Footer() {
         <div className="footer-grid footer-grid-3">
           <div className="footer-brand">
             <Link to="/" className="logo">
-              <span className="mark"><img src="/logo-icon.png" alt="Showme TV" /></span>
-              <span className="logo-text-wrap">
-                Showme TV<small>البث والترفيه</small>
-              </span>
+              <img className="brand-logo" src="/logo.png" alt="Showme TV" />
             </Link>
             <p>{c.footerBrandDesc}</p>
             <div className="socials" aria-label="روابط التواصل الاجتماعي">

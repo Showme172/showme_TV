@@ -25,8 +25,7 @@ export default function AdminLogin({ onLoggedIn }) {
     <div className="admin-login-wrap">
       <form className="admin-login-card" onSubmit={handleSubmit}>
         <div className="logo" style={{ marginBottom: 24 }}>
-          <span className="mark"><img src="/logo-icon.png" alt="Showme TV" /></span>
-          <span className="logo-text-wrap">Showme TV<small>لوحة التحكم</small></span>
+          <img className="brand-logo" src="/logo.png" alt="Showme TV" />
         </div>
         <div className="field">
           <label>البريد الإلكتروني</label>
