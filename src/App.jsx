@@ -35,22 +35,24 @@ export default function App() {
       <div className="grid-overlay"></div>
       <ScrollToTop />
       {!isPay && <Header />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/contact" element={<Contact />} />
-       
-        <Route path="/downloads" element={<Downloads />} />
-        <Route path="/guides" element={<Guides />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/pay/:id" element={<PayPage />} />
-        {/* روابط قديمة — بتحوّل تلقائياً حتى لو حدا عنده رابط محفوظ */}
-        <Route path="/features" element={<Navigate to="/#features" replace />} />
-        <Route path="/channels" element={<Navigate to="/#channels" replace />} />
-        <Route path="/support" element={<Navigate to="/contact" replace />} />
-      </Routes>
+      <div key={pathname} className="page-transition">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/contact" element={<Contact />} />
+
+          <Route path="/downloads" element={<Downloads />} />
+          <Route path="/guides" element={<Guides />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/pay/:id" element={<PayPage />} />
+          {/* روابط قديمة — بتحوّل تلقائياً حتى لو حدا عنده رابط محفوظ */}
+          <Route path="/features" element={<Navigate to="/#features" replace />} />
+          <Route path="/channels" element={<Navigate to="/#channels" replace />} />
+          <Route path="/support" element={<Navigate to="/contact" replace />} />
+        </Routes>
+      </div>
       {!isPay && <Footer />}
       {!isAdmin && !isPay && <AnnouncementPopup />}
       {!isAdmin && !isPay && <LiveChat />}

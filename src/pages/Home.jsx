@@ -42,7 +42,7 @@ export default function Home() {
            
           </div>
           <div className="hero-stats">
-            <div className="stat"><CountUp text="15,000+" /><span>قناة مباشرة</span></div>
+            <div className="stat"><CountUp text="50,000+" /><span>قناة مباشرة</span></div>
             <div className="stat"><CountUp text="200,000+" /><span>فيلم ومسلسل</span></div>
             <div className="stat"><CountUp text="4K" /><span>جودة البث</span></div>
             <div className="stat"><CountUp text="24/7" /><span>دعم مباشر</span></div>

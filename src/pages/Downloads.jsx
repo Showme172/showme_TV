@@ -90,7 +90,8 @@ export default function Downloads() {
                           <div className="apps-grid">
                             {platformApps.map((app, i) => (
                               <Reveal key={app.id} delay={Math.min(i * 60, 300)}>
-                                <div className="app-card">
+                                <div className={`app-card ${app.is_recommended ? 'app-card-recommended' : ''}`}>
+                                  {app.is_recommended && <span className="app-recommended-badge">⭐ ننصح فيه</span>}
                                   {app.icon_url ? (
                                     <img className="app-icon" src={app.icon_url} alt={app.name} />
                                   ) : (

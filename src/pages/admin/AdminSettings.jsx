@@ -180,7 +180,7 @@ export default function AdminSettings() {
           className="btn btn-outline"
           onClick={() => addItem('plans', {
             name: 'خطة جديدة', price: '€0', period: '/ شهر', sub: '', perk: null,
-            features: ['أكثر من 15,000 قناة مباشرة', 'مكتبة أفلام ومسلسلات كاملة (+200,000)'],
+            features: ['أكثر من 50,000 قناة مباشرة', 'مكتبة أفلام ومسلسلات كاملة (+200,000)'],
             featured: false, badge: null, telegramMessage: 'مرحباً، أرغب بالاشتراك من Showme TV'
           })}
         >
