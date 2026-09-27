@@ -1,9 +1,25 @@
 import { useState } from 'react';
 import { useApps } from '../hooks/useApps';
 import { useConfig } from '../context/ConfigContext';
+import { useLanguage } from '../context/LanguageContext';
 import Reveal from '../components/Reveal';
 
-function DownloadButton({ url }) {
+const T = {
+  ar: {
+    download: 'تحميل', downloadStarted: '✓ بدأ التحميل', loading: 'جاري التحميل...',
+    platformsLabel: 'منصات التطبيقات', appCount: 'تطبيق',
+    noApps: 'لا توجد تطبيقات مضافة لهذه المنصة حالياً.', recommended: '⭐ ننصح فيه',
+    version: 'الإصدار', downloaderCode: 'كود Downloader:', guide: 'الشرح',
+  },
+  en: {
+    download: 'Download', downloadStarted: '✓ Download started', loading: 'Loading...',
+    platformsLabel: 'App platforms', appCount: 'app',
+    noApps: 'No apps added for this platform yet.', recommended: '⭐ Recommended',
+    version: 'Version', downloaderCode: 'Downloader code:', guide: 'Guide',
+  },
+};
+
+function DownloadButton({ url, t }) {
   const [clicked, setClicked] = useState(false);
 
   function handleClick() {
@@ -19,8 +35,8 @@ function DownloadButton({ url }) {
       className={`btn btn-primary btn-sm download-btn ${clicked ? 'is-clicked' : ''}`}
       onClick={handleClick}
     >
-      <span className="download-btn-label">تحميل</span>
-      <span className="download-btn-check">✓ بدأ التحميل</span>
+      <span className="download-btn-label">{t.download}</span>
+      <span className="download-btn-check">{t.downloadStarted}</span>
     </a>
   );
 }
@@ -28,6 +44,8 @@ function DownloadButton({ url }) {
 export default function Downloads() {
   const config = useConfig();
   const c = config.copy;
+  const { lang } = useLanguage();
+  const t = T[lang];
   const { apps, loading } = useApps();
   const [activePlatform, setActivePlatform] = useState('android');
   const platforms = [
@@ -53,9 +71,9 @@ export default function Downloads() {
 
       <section>
         <div className="wrap">
-          {loading && <p className="hint">جاري التحميل...</p>}
+          {loading && <p className="hint">{t.loading}</p>}
           <div className="platform-slider" dir="ltr">
-            <div className="platform-tabs" role="tablist" aria-label="منصات التطبيقات">
+            <div className="platform-tabs" role="tablist" aria-label={t.platformsLabel}>
               {platforms.map((platform) => (
                 <button
                   key={platform.id}
@@ -68,7 +86,7 @@ export default function Downloads() {
                     <img src={platform.logo} alt="" />
                   </span>
                   <span>{platform.label}</span>
-                  <small>{appsForPlatform(platform.id).length} تطبيق</small>
+                  <small>{appsForPlatform(platform.id).length} {t.appCount}</small>
                 </button>
               ))}
             </div>
@@ -85,13 +103,13 @@ export default function Downloads() {
                         key={isActive ? `${platform.id}-active` : platform.id}
                       >
                         {platformApps.length === 0 ? (
-                          <p className="hint platform-empty">لا توجد تطبيقات مضافة لهذه المنصة حالياً.</p>
+                          <p className="hint platform-empty">{t.noApps}</p>
                         ) : (
                           <div className="apps-grid">
                             {platformApps.map((app, i) => (
                               <Reveal key={app.id} delay={Math.min(i * 60, 300)}>
                                 <div className={`app-card ${app.is_recommended ? 'app-card-recommended' : ''}`}>
-                                  {app.is_recommended && <span className="app-recommended-badge">⭐ ننصح فيه</span>}
+                                  {app.is_recommended && <span className="app-recommended-badge">{t.recommended}</span>}
                                   {app.icon_url ? (
                                     <img className="app-icon" src={app.icon_url} alt={app.name} />
                                   ) : (
@@ -99,15 +117,15 @@ export default function Downloads() {
                                   )}
                                   <div className="app-info">
                                     <h3>{app.name}</h3>
-                                    {app.version && <span className="app-version">الإصدار {app.version}</span>}
+                                    {app.version && <span className="app-version">{t.version} {app.version}</span>}
                                     {app.downloader_code && (
-                                      <span className="app-downloader-code">كود Downloader: <b>{app.downloader_code}</b></span>
+                                      <span className="app-downloader-code">{t.downloaderCode} <b>{app.downloader_code}</b></span>
                                     )}
                                   </div>
-                                  <DownloadButton url={app.download_url} />
+                                  <DownloadButton url={app.download_url} t={t} />
                                   {app.tutorial_url && (
                                     <a href={app.tutorial_url} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm">
-                                      الشرح
+                                      {t.guide}
                                     </a>
                                   )}
                                 </div>

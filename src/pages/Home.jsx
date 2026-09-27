@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useConfig } from '../context/ConfigContext';
+import { useLanguage } from '../context/LanguageContext';
 import Ticker from '../components/Ticker';
 import FeatureGrid from '../components/FeatureGrid';
 import CategoryGrid from '../components/CategoryGrid';
@@ -10,9 +11,16 @@ import CountUp from '../components/CountUp';
 import LiveScoreBanner from '../components/LiveScoreBanner';
 import TrustBadges from '../components/TrustBadges';
 
+const STATS_LABELS = {
+  ar: { channels: 'قناة مباشرة', movies: 'فيلم ومسلسل', quality: 'جودة البث', support: 'دعم مباشر' },
+  en: { channels: 'Live channels', movies: 'Movies & series', quality: 'Stream quality', support: 'Live support' },
+};
+
 export default function Home() {
   const config = useConfig();
   const c = config.copy;
+  const { lang } = useLanguage();
+  const statsLabels = STATS_LABELS[lang];
   const [visibleFeatures, setVisibleFeatures] = useState(3);
   const [visibleChannels, setVisibleChannels] = useState(3);
 
@@ -24,14 +32,12 @@ export default function Home() {
 
   return (
     <main>
-      <section className="hero" style={{ backgroundcolor: 'blue' }} >          
-        <div className="wrap" >
+      <section className="hero">
+        <div className="wrap">
           <h1>
             {c.heroLine}
             <br />
-            <span className="accent">{c.heroAccent}
-              
-            </span>
+            <span className="accent">{c.heroAccent}</span>
           </h1>
           <p className="sub">{c.heroSub}</p>
           <div className="hero-ctas">
@@ -39,17 +45,15 @@ export default function Home() {
               {c.heroBtnSubscribe}
             </ContactButton>
             <Link to="/pricing" className="btn btn-outline btn-lg">{c.heroBtnPlans}</Link>
-           
           </div>
           <div className="hero-stats">
-            <div className="stat"><CountUp text="50,000+" /><span>قناة مباشرة</span></div>
-            <div className="stat"><CountUp text="200,000+" /><span>فيلم ومسلسل</span></div>
-            <div className="stat"><CountUp text="4K" /><span>جودة البث</span></div>
-            <div className="stat"><CountUp text="24/7" /><span>دعم مباشر</span></div>
+            <div className="stat"><CountUp text="50,000+" /><span>{statsLabels.channels}</span></div>
+            <div className="stat"><CountUp text="200,000+" /><span>{statsLabels.movies}</span></div>
+            <div className="stat"><CountUp text="4K" /><span>{statsLabels.quality}</span></div>
+            <div className="stat"><CountUp text="24/7" /><span>{statsLabels.support}</span></div>
           </div>
           <TrustBadges items={config.trustBadges} />
         </div>
-        
       </section>
 
       <LiveScoreBanner />

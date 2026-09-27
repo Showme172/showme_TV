@@ -1,6 +1,9 @@
 import { useTutorials } from '../hooks/useTutorials';
 import { useConfig } from '../context/ConfigContext';
+import { useLanguage } from '../context/LanguageContext';
 import Reveal from '../components/Reveal';
+
+const LOADING_TEXT = { ar: 'جاري التحميل...', en: 'Loading...' };
 
 function youtubeId(url) {
   if (!url) return null;
@@ -17,6 +20,7 @@ function thumbFor(tutorial) {
 export default function Guides() {
   const config = useConfig();
   const c = config.copy;
+  const { lang } = useLanguage();
   const { tutorials, loading } = useTutorials();
 
   return (
@@ -31,7 +35,7 @@ export default function Guides() {
 
       <section>
         <div className="wrap">
-          {loading && <p className="hint">جاري التحميل...</p>}
+          {loading && <p className="hint">{LOADING_TEXT[lang]}</p>}
           {!loading && tutorials.length === 0 && (
             <p className="hint">{c.guidesEmptyState}</p>
           )}

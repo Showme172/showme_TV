@@ -2,12 +2,32 @@ import { Link } from 'react-router-dom';
 
 import { telegramLink } from '../config';
 import { useConfig } from '../context/ConfigContext';
+import { useLanguage } from '../context/LanguageContext';
 import { SOCIAL_ICONS } from './Icons';
 import ShareButton from './ShareButton';
+
+const T = {
+  ar: {
+    socialsLabel: 'روابط التواصل الاجتماعي',
+    nav: 'التنقل', contact: 'تواصل معنا',
+    telegram: 'تيليجرام', whatsapp: 'واتساب', facebook: 'فيسبوك',
+    rights: 'جميع الحقوق محفوظة.',
+    terms: 'شروط الخدمة', privacy: 'سياسة الخصوصية',
+  },
+  en: {
+    socialsLabel: 'Social media links',
+    nav: 'Navigation', contact: 'Contact Us',
+    telegram: 'Telegram', whatsapp: 'WhatsApp', facebook: 'Facebook',
+    rights: 'All rights reserved.',
+    terms: 'Terms of Service', privacy: 'Privacy Policy',
+  },
+};
 
 export default function Footer() {
   const config = useConfig();
   const c = config.copy;
+  const { lang } = useLanguage();
+  const t = T[lang];
 
   const PAGES = [
     { href: '/', label: c.navHome },
@@ -25,7 +45,7 @@ export default function Footer() {
               <img className="brand-logo" src="/logo.png" alt="Showme TV" />
             </Link>
             <p>{c.footerBrandDesc}</p>
-            <div className="socials" aria-label="روابط التواصل الاجتماعي">
+            <div className="socials" aria-label={t.socialsLabel}>
               <a href={telegramLink(config.messages.trial)} target="_blank" rel="noopener noreferrer" aria-label="Telegram">
                 {SOCIAL_ICONS.telegram}
               </a>
@@ -44,7 +64,7 @@ export default function Footer() {
           </div>
 
           <div className="footer-col">
-            <h4>التنقل</h4>
+            <h4>{t.nav}</h4>
             <ul>
               {PAGES.map((p) => (
                 <li key={p.href}><Link to={p.href}>{p.label}</Link></li>
@@ -53,14 +73,14 @@ export default function Footer() {
           </div>
 
           <div className="footer-col">
-            <h4>تواصل معنا</h4>
+            <h4>{t.contact}</h4>
             <ul>
-              <li><a href={telegramLink(config.messages.trial)} target="_blank" rel="noopener noreferrer">تيليجرام — @{config.telegramUsername}</a></li>
+              <li><a href={telegramLink(config.messages.trial)} target="_blank" rel="noopener noreferrer">{t.telegram} — @{config.telegramUsername}</a></li>
               {config.whatsappNumber && (
-                <li><a href={`https://wa.me/${config.whatsappNumber}`} target="_blank" rel="noopener noreferrer">واتساب</a></li>
+                <li><a href={`https://wa.me/${config.whatsappNumber}`} target="_blank" rel="noopener noreferrer">{t.whatsapp}</a></li>
               )}
               {config.facebookUrl && (
-                <li><a href={config.facebookUrl} target="_blank" rel="noopener noreferrer">فيسبوك</a></li>
+                <li><a href={config.facebookUrl} target="_blank" rel="noopener noreferrer">{t.facebook}</a></li>
               )}
               <li><a href={`mailto:${config.contactEmail}`}>{config.contactEmail}</a></li>
             </ul>
@@ -68,10 +88,10 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
-          <p>© 2026 Showme TV. جميع الحقوق محفوظة.</p>
+          <p>© 2026 Showme TV. {t.rights}</p>
           <div className="footer-legal">
-            <Link to="/terms">شروط الخدمة</Link>
-            <Link to="/privacy">سياسة الخصوصية</Link>
+            <Link to="/terms">{t.terms}</Link>
+            <Link to="/privacy">{t.privacy}</Link>
           </div>
         </div>
       </div>

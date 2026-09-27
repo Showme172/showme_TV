@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useAnnouncement } from '../hooks/useAnnouncement';
+import { useLanguage } from '../context/LanguageContext';
+
+const T = {
+  ar: { close: 'إغلاق', badge: '📢 إعلان', endsIn: 'ينتهي العرض خلال' },
+  en: { close: 'Close', badge: '📢 Announcement', endsIn: 'Offer ends in' },
+};
 
 function useCountdown(announcement) {
   const [label, setLabel] = useState('');
@@ -30,6 +36,8 @@ function useCountdown(announcement) {
 }
 
 export default function AnnouncementPopup() {
+  const { lang } = useLanguage();
+  const t = T[lang];
   const announcement = useAnnouncement();
   const [dismissed, setDismissed] = useState(false);
   const [show, setShow] = useState(false);
@@ -58,12 +66,12 @@ export default function AnnouncementPopup() {
   return (
     <div className="announcement-overlay" onClick={close}>
       <div className="announcement-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="contact-modal-close" onClick={close} aria-label="إغلاق">✕</button>
-        <span className="announcement-badge">📢 إعلان</span>
+        <button className="contact-modal-close" onClick={close} aria-label={t.close}>✕</button>
+        <span className="announcement-badge">{t.badge}</span>
         <p>{announcement.message}</p>
         {countdown && (
           <div className="announcement-countdown">
-            <span>ينتهي العرض خلال</span>
+            <span>{t.endsIn}</span>
             <b>{countdown}</b>
           </div>
         )}

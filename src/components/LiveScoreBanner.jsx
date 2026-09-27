@@ -1,12 +1,16 @@
 import { useLiveScores } from '../hooks/useLiveScores';
+import { useLanguage } from '../context/LanguageContext';
+
+const ARIA_LABEL = { ar: 'مباريات مباشرة الآن', en: 'Live matches now' };
 
 export default function LiveScoreBanner() {
   const { scores, isLive, loading } = useLiveScores();
+  const { lang } = useLanguage();
 
   if (loading || !isLive || scores.length === 0) return null;
 
   return (
-    <div className="live-score-band" aria-label="مباريات مباشرة الآن">
+    <div className="live-score-band" aria-label={ARIA_LABEL[lang]}>
       <div className="wrap">
         <div className="live-score-track">
           {scores.map((m, i) => (

@@ -55,7 +55,7 @@ export default function Header() {
         <button
           className={`mobile-menu-toggle ${menuOpen ? 'open' : ''}`}
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="القائمة"
+          aria-label={lang === 'en' ? 'Menu' : 'القائمة'}
         >
           <span></span>
           <span></span>

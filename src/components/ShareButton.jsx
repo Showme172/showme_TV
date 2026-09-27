@@ -1,12 +1,20 @@
 import { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
+
+const T = {
+  ar: { shareText: 'شوف Showme TV — اشتراك IPTV احترافي، قنوات وأفلام بلا انقطاع.', copied: '✅ تم نسخ الرابط', share: '🔗 شارك الموقع' },
+  en: { shareText: 'Check out Showme TV — professional IPTV subscription, channels and movies without interruption.', copied: '✅ Link copied', share: '🔗 Share the site' },
+};
 
 export default function ShareButton({ className }) {
+  const { lang } = useLanguage();
+  const t = T[lang];
   const [copied, setCopied] = useState(false);
 
   async function handleShare() {
     const url = window.location.origin;
     const title = 'Showme TV';
-    const text = 'شوف Showme TV — اشتراك IPTV احترافي، قنوات وأفلام بلا انقطاع.';
+    const text = t.shareText;
 
     if (navigator.share) {
       try {
@@ -28,7 +36,7 @@ export default function ShareButton({ className }) {
 
   return (
     <button type="button" className={className} onClick={handleShare}>
-      {copied ? '✅ تم نسخ الرابط' : '🔗 شارك الموقع'}
+      {copied ? t.copied : t.share}
     </button>
   );
 }

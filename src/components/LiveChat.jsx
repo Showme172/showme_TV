@@ -1,10 +1,35 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
-const METHODS = [
-  { id: 'phone', label: 'رقم هاتف', placeholder: '+963...' },
-  { id: 'email', label: 'إيميل', placeholder: 'you@example.com' },
-  { id: 'telegram', label: 'يوزر تيليجرام', placeholder: '@username' },
-];
+const METHODS = {
+  ar: [
+    { id: 'phone', label: 'رقم هاتف', placeholder: '+963...' },
+    { id: 'email', label: 'إيميل', placeholder: 'you@example.com' },
+    { id: 'telegram', label: 'يوزر تيليجرام', placeholder: '@username' },
+  ],
+  en: [
+    { id: 'phone', label: 'Phone number', placeholder: '+963...' },
+    { id: 'email', label: 'Email', placeholder: 'you@example.com' },
+    { id: 'telegram', label: 'Telegram username', placeholder: '@username' },
+  ],
+};
+
+const T = {
+  ar: {
+    title: 'تواصل معنا', subtitle: 'بنرد عليك بأقرب وقت', close: 'إغلاق',
+    typeMessage: 'اكتب رسالتك...', send: 'إرسال', greeting: 'اكتبلنا اسمك ووسيلة تواصل، وشو بتحب تسألنا.',
+    namePlaceholder: 'اسمك', messagePlaceholder: 'اكتب رسالتك هون...',
+    error: 'صار خطأ بالإرسال، جرّب مرة تانية.', sending: 'جاري الإرسال...', start: 'بدء المحادثة',
+    toggleLabel: 'تواصل معنا',
+  },
+  en: {
+    title: 'Contact Us', subtitle: 'We usually reply quickly', close: 'Close',
+    typeMessage: 'Type your message...', send: 'Send', greeting: "Tell us your name and a way to reach you, and what you'd like to ask.",
+    namePlaceholder: 'Your name', messagePlaceholder: 'Type your message here...',
+    error: 'Something went wrong sending it, try again.', sending: 'Sending...', start: 'Start Conversation',
+    toggleLabel: 'Contact us',
+  },
+};
 
 const POLL_MS = 2500;
 const STORAGE_KEY = 'inquiry_conversation_id';
@@ -15,6 +40,10 @@ function functionsUrl(name) {
 }
 
 export default function LiveChat() {
+  const { lang } = useLanguage();
+  const t = T[lang];
+  const methods = METHODS[lang];
+
   const [open, setOpen] = useState(false);
   const [method, setMethod] = useState('phone');
   const [form, setForm] = useState({ name: '', contact: '', message: '' });
@@ -78,7 +107,7 @@ export default function LiveChat() {
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok) throw new Error(data.error || 'فشل الإرسال');
+      if (!res.ok || !data.ok) throw new Error(data.error || 'failed');
 
       setConversationId(data.conversation_id);
       try { sessionStorage.setItem(STORAGE_KEY, data.conversation_id); } catch { /* noop */ }
@@ -109,7 +138,7 @@ export default function LiveChat() {
     } catch { /* هيك رح تضل الرسالة ظاهرة عند الزائر، وبترسل تلقائياً بالمحاولة الجاية */ }
   }
 
-  const activeMethod = METHODS.find((m) => m.id === method);
+  const activeMethod = methods.find((m) => m.id === method);
 
   return (
     <div className="live-chat">
@@ -117,10 +146,10 @@ export default function LiveChat() {
         <div className="live-chat-panel">
           <div className="live-chat-head">
             <div className="live-chat-head-info">
-              <b>تواصل معنا</b>
-              <span>بنرد عليك بأقرب وقت</span>
+              <b>{t.title}</b>
+              <span>{t.subtitle}</span>
             </div>
-            <button className="live-chat-close" onClick={toggle} aria-label="إغلاق">✕</button>
+            <button className="live-chat-close" onClick={toggle} aria-label={t.close}>✕</button>
           </div>
 
           <div className="live-chat-body">
@@ -135,26 +164,26 @@ export default function LiveChat() {
                 </div>
                 <form className="live-chat-reply-row" onSubmit={handleSend}>
                   <input
-                    placeholder="اكتب رسالتك..."
+                    placeholder={t.typeMessage}
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                   />
-                  <button type="submit" className="btn btn-primary btn-sm">إرسال</button>
+                  <button type="submit" className="btn btn-primary btn-sm">{t.send}</button>
                 </form>
               </div>
             ) : (
               <form className="live-chat-form" onSubmit={handleStart}>
-                <p className="live-chat-greeting">اكتبلنا اسمك ووسيلة تواصل، وشو بتحب تسألنا.</p>
+                <p className="live-chat-greeting">{t.greeting}</p>
 
                 <input
-                  placeholder="اسمك"
+                  placeholder={t.namePlaceholder}
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
                 />
 
                 <div className="live-chat-method-row">
-                  {METHODS.map((m) => (
+                  {methods.map((m) => (
                     <button
                       type="button"
                       key={m.id}
@@ -174,18 +203,18 @@ export default function LiveChat() {
                 />
 
                 <textarea
-                  placeholder="اكتب رسالتك هون..."
+                  placeholder={t.messagePlaceholder}
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   required
                 />
 
                 {status === 'error' && (
-                  <p className="form-error">صار خطأ بالإرسال، جرّب مرة تانية.</p>
+                  <p className="form-error">{t.error}</p>
                 )}
 
                 <button type="submit" className="btn btn-primary" disabled={status === 'sending'}>
-                  {status === 'sending' ? 'جاري الإرسال...' : 'بدء المحادثة'}
+                  {status === 'sending' ? t.sending : t.start}
                 </button>
               </form>
             )}
@@ -193,7 +222,7 @@ export default function LiveChat() {
         </div>
       )}
 
-      <button className="live-chat-toggle" onClick={toggle} aria-label="تواصل معنا">
+      <button className="live-chat-toggle" onClick={toggle} aria-label={t.toggleLabel}>
         {open ? '✕' : '💬'}
       </button>
     </div>
