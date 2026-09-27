@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Smart TV">
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+    <rect x="7" y="13" width="50" height="34" rx="4"/>
+    <path d="M24 56h16M32 47v9M23 7l9 7 9-7"/>
+  </g>
+</svg>
